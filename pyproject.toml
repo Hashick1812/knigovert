@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "knigovert"
+description = "Офлайн-конвертер и сборщик книг: FB2, DOCX, PDF, EPUB, TXT, HTML, Markdown"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0-or-later" }
+dynamic = ["version"]
+dependencies = [
+    "pymupdf>=1.24",
+    "reportlab>=4.0",
+    "python-docx>=1.1",
+    "lxml>=5.0",
+    "beautifulsoup4>=4.12",
+    "markdown-it-py>=3.0",
+    "mdit-py-plugins>=0.4",
+    "pyphen>=0.14",
+    "pillow>=10.0",
+    "pywebview>=5.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pyinstaller>=6.0"]
+
+[project.scripts]
+knigovert = "knigovert.__main__:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "knigovert.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+knigovert = ["assets/fonts/*", "assets/*.ico", "web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::bs4.XMLParsedAsHTMLWarning"]

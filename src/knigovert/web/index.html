@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="kv-token" content="{{TOKEN}}">
+<title>Книговёрт</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<svg class="sprite" aria-hidden="true">
+  <symbol id="i-up" viewBox="0 0 16 16"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 16 16"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-indent" viewBox="0 0 16 16"><path d="M2 3h12M7 8h7M7 13h7M2 6l3 2-3 2z" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-outdent" viewBox="0 0 16 16"><path d="M2 3h12M7 8h7M7 13h7M5 6 2 8l3 2z" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 16 16"><path d="M5.5 3 2.5 6l3 3M3 6h6.5a3.5 3.5 0 0 1 0 7H6" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 16 16"><path d="M10.5 3l3 3-3 3M13 6H6.5a3.5 3.5 0 0 0 0 7H10" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+  <symbol id="i-grip" viewBox="0 0 16 16"><path d="M5.5 3.5h.01M5.5 8h.01M5.5 12.5h.01M10.5 3.5h.01M10.5 8h.01M10.5 12.5h.01" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-close" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+</svg>
+
+<header class="top">
+  <h1 class="brand">Книговёрт</h1>
+  <div class="tabs" role="tablist" aria-label="Режим работы">
+    <button class="tab" role="tab" id="tab-convert" aria-controls="view-convert" aria-selected="true">Конвертация</button>
+    <button class="tab" role="tab" id="tab-builder" aria-controls="view-builder" aria-selected="false" tabindex="-1">Сборка книги</button>
+  </div>
+</header>
+
+<main class="views">
+  <section id="view-convert" class="view convert" role="tabpanel" aria-labelledby="tab-convert">
+    <div class="files-pane">
+      <div id="file-list" class="file-list"></div>
+      <div id="convert-drop" class="dropzone">
+        <p class="drop-title">Перетащите сюда файлы книг</p>
+        <p class="drop-hint">FB2, DOCX, PDF, EPUB, TXT, HTML и Markdown. Можно сразу несколько.</p>
+        <button class="btn" id="convert-pick" type="button">Выбрать файлы</button>
+      </div>
+    </div>
+    <aside class="target-pane">
+      <h2 class="pane-title" id="shelf-title">Во что превратить</h2>
+      <div id="shelf" class="shelf" role="radiogroup" aria-labelledby="shelf-title"></div>
+      <p id="target-note" class="target-note"></p>
+      <div id="convert-options" class="options"></div>
+      <button class="btn primary wide" id="convert-run" type="button" disabled>Сделать</button>
+      <p id="convert-hint" class="hint"></p>
+    </aside>
+  </section>
+
+  <section id="view-builder" class="view builder" role="tabpanel" aria-labelledby="tab-builder" hidden>
+    <aside class="book-pane">
+      <h2 class="pane-title">Книга</h2>
+      <label class="field"><span>Название</span><input id="book-title" type="text" autocomplete="off"></label>
+      <label class="field"><span>Автор</span><input id="book-authors" type="text" autocomplete="off" placeholder="Несколько — через запятую"></label>
+      <div class="field">
+        <span>Обложка</span>
+        <div class="cover-row">
+          <img id="cover-thumb" class="cover-thumb" alt="Обложка книги" hidden>
+          <button class="btn small" id="cover-pick" type="button">Выбрать картинку</button>
+          <button class="btn small quiet" id="cover-clear" type="button" hidden>Убрать</button>
+        </div>
+      </div>
+      <label class="field"><span>Сохранить как</span><select id="book-format"></select></label>
+      <label id="keep-pages-row" class="check" hidden><input id="keep-pages" type="checkbox" checked><span>Оставить страницы исходных PDF как есть</span></label>
+      <div id="book-options" class="options"></div>
+      <button class="btn primary wide" id="book-save" type="button" disabled>Сохранить книгу</button>
+      <div id="book-result" class="result-box" hidden></div>
+    </aside>
+
+    <div class="chapters-pane">
+      <div class="chapters-head">
+        <button class="btn" id="builder-pick" type="button">Добавить файлы</button>
+        <label class="check inline"><input id="builder-split" type="checkbox" checked><span>Делить файл на главы</span></label>
+        <span id="book-summary" class="summary"></span>
+      </div>
+      <div id="book-strip" class="strip" hidden></div>
+      <div id="chapter-tools" class="tools" hidden>
+        <label class="check inline select-all"><input id="check-all" type="checkbox" aria-label="Выбрать все главы"></label>
+        <button class="tool" id="tool-up" type="button" title="Переместить выше (Alt+↑)" aria-label="Переместить выше"><svg aria-hidden="true"><use href="#i-up"/></svg></button>
+        <button class="tool" id="tool-down" type="button" title="Переместить ниже (Alt+↓)" aria-label="Переместить ниже"><svg aria-hidden="true"><use href="#i-down"/></svg></button>
+        <button class="tool" id="tool-outdent" type="button" title="Сделать уровнем выше" aria-label="Сделать уровнем выше"><svg aria-hidden="true"><use href="#i-outdent"/></svg></button>
+        <button class="tool" id="tool-indent" type="button" title="Сделать подглавой" aria-label="Сделать подглавой"><svg aria-hidden="true"><use href="#i-indent"/></svg></button>
+        <span class="tool-gap"></span>
+        <button class="btn small" id="tool-merge" type="button" disabled>Объединить</button>
+        <label id="merge-keep-row" class="check inline small-text" hidden><input id="merge-keep" type="checkbox" checked><span>Оставить названия в тексте</span></label>
+        <button class="btn small quiet" id="tool-remove" type="button">Удалить</button>
+        <span class="tool-spacer"></span>
+        <button class="tool" id="tool-undo" type="button" title="Отменить (Ctrl+Z)" aria-label="Отменить" disabled><svg aria-hidden="true"><use href="#i-undo"/></svg></button>
+        <button class="tool" id="tool-redo" type="button" title="Вернуть (Ctrl+Y)" aria-label="Вернуть" disabled><svg aria-hidden="true"><use href="#i-redo"/></svg></button>
+      </div>
+      <ol id="chapter-list" class="chapter-list"></ol>
+      <div id="builder-empty" class="dropzone tall">
+        <p class="drop-title">Соберите книгу из нескольких файлов</p>
+        <p class="drop-hint">Перетащите сюда файлы: главы появятся списком. Их можно менять местами, объединять, делить и переименовывать.</p>
+      </div>
+    </div>
+
+    <div class="preview-pane">
+      <h2 id="preview-title" class="preview-title">Текст главы</h2>
+      <p id="preview-hint" class="hint">Нажмите на главу, чтобы прочитать её здесь.</p>
+      <div id="preview" class="preview"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="foot-path">Файлы сохраняются в <button id="folder-open" class="link" type="button" title="Открыть папку"></button></span>
+  <button id="folder-change" class="link" type="button">Изменить папку</button>
+  <span class="foot-note">Работает без интернета, файлы остаются на этом компьютере</span>
+</footer>
+
+<div id="drop-veil" class="drop-veil" hidden><p>Отпустите файлы</p></div>
+<div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+<input id="file-input" type="file" multiple hidden accept=".fb2,.zip,.docx,.pdf,.epub,.txt,.text,.html,.htm,.xhtml,.md,.markdown">
+<input id="cover-input" type="file" hidden accept="image/*">
+<script src="app.js"></script>
+</body>
+</html>
